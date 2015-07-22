@@ -1,0 +1,8 @@
+Sub pullForecast()
+'aggregates the individual components designed to aggregate forecast
+'data from the monthly snapshots for the long term forecasting team
+Call inptUser
+Call wkbkOpen
+Call copyLoop
+
+End Sub
