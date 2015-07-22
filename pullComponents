@@ -1,0 +1,47 @@
+Option Explicit
+Public dNum As Double
+Public x As Workbook, y As Workbook
+
+Sub inptUser()
+    On Error Resume Next
+
+        Application.DisplayAlerts = False
+        Application.ScreenUpdating = False
+            dNum = Application.InputBox _
+             (Prompt:="Please enter date of most recent snapshot." & vbNewLine & _
+                    "(Format: YYYY.MM)", Title:="Snapshot Date", Type:=1) 'Type 1 restricts to number so Double works
+
+    On Error GoTo 0
+    
+Range("M1").Value = dNum'Added to make certain that the user input is what was intended
+
+End Sub
+
+Sub wkbkOpen()
+
+Dim fPath As String, fName As String, fType As String
+
+fPath = Range("FilePath")
+fName = Range("FileName")
+fType = Range("FileType")
+
+  Range("M2").Value = fPath & fName & Format(dNum, "Fixed") & fType
+  Set x = Workbooks.Open(fPath & fName & Format(dNum, "Fixed") & fType)
+  Set y = Workbooks.Open("P:\Data\Forecast Storage\Forecast-Storage_Monthly_v02.xlsm")
+  
+End Sub
+
+Sub copyLoop()
+
+Dim buRange As Range, buCell As Range
+Dim lastRow As String
+
+For Each buCell In buRange
+
+  lastRow = y.Cells(Rows.Count, "E").End(xlUp).Row + 1
+'Now, transfer values from x to y:
+  y.Sheets("Data").Range("E" & lastRow).Value = x.Sheets(buCell.Value).Range("T11")
+  
+Next buCell
+
+End Sub
