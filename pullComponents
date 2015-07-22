@@ -3,6 +3,7 @@ Public dNum As Double
 Public x As Workbook, y As Workbook
 
 Sub inptUser()
+'takes user input and stores as dNum
     On Error Resume Next
 
         Application.DisplayAlerts = False
@@ -13,12 +14,12 @@ Sub inptUser()
 
     On Error GoTo 0
     
-Range("M1").Value = dNum'Added to make certain that the user input is what was intended
+Range("M1").Value = dNum 'Added to make certain that the user input is what was intended
 
 End Sub
 
 Sub wkbkOpen()
-
+'opens workbook based on user input, also stores as variables
 Dim fPath As String, fName As String, fType As String
 
 fPath = Range("FilePath")
@@ -27,21 +28,47 @@ fType = Range("FileType")
 
   Range("M2").Value = fPath & fName & Format(dNum, "Fixed") & fType
   Set x = Workbooks.Open(fPath & fName & Format(dNum, "Fixed") & fType)
-  Set y = Workbooks.Open("P:\Data\Forecast Storage\Forecast-Storage_Monthly_v02.xlsm")
+  Set y = Workbooks("Forecast-Storage_Monthly_v02.xlsm")
   
 End Sub
 
 Sub copyLoop()
 
-Dim buRange As Range, buCell As Range
+Dim buRange As Range, buCell As Range, rng1 As Range
+Dim colRange As Range, colCell As Range
 Dim lastRow As String
+Dim counter As Integer
 
-For Each buCell In buRange
+Set buRange = Workbooks("Forecast-Storage_Monthly_v02.xlsm").Worksheets("Control").Range("Bu_Name")
+Set colRange = Workbooks("Forecast-Storage_Monthly_v02.xlsm").Worksheets("Control").Range("colLookup")
+counter = 3
+'lDate = Date
 
-  lastRow = y.Cells(Rows.Count, "E").End(xlUp).Row + 1
-'Now, transfer values from x to y:
-  y.Sheets("Data").Range("E" & lastRow).Value = x.Sheets(buCell.Value).Range("T11")
-  
-Next buCell
+
+
+Do While counter < 7
+For Each colCell In colRange
+    For Each buCell In buRange
+    
+        Set rng1 = x.Sheets(buCell.Value).Range("2:2").Find(colCell.Value, , xlValues, xlWhole)
+        lastRow = y.Sheets("Data").Cells(Rows.Count, "E").End(xlUp).Row + 1
+        y.Sheets("Data").Range("A" & lastRow).Value = Year(x.Sheets(buCell.Value).Cells(4, rng1.Column))
+        y.Sheets("Data").Range("B" & lastRow).Value = Month(x.Sheets(buCell.Value).Cells(4, rng1.Column))
+        y.Sheets("Data").Range("C" & lastRow).Value = buCell.Value
+        y.Sheets("Data").Range("D" & lastRow).Value = counter
+        'Now, transfer values from x to y:
+        y.Sheets("Data").Range("E" & lastRow).Value = x.Sheets(buCell.Value).Cells(11, rng1.Column)
+        y.Sheets("Data").Range("F" & lastRow).Value = x.Sheets(buCell.Value).Cells(12, rng1.Column)
+        y.Sheets("Data").Range("G" & lastRow).Value = x.Sheets(buCell.Value).Cells(31, rng1.Column)
+        y.Sheets("Data").Range("H" & lastRow).Value = x.Sheets(buCell.Value).Cells(72, rng1.Column)
+        y.Sheets("Data").Range("I" & lastRow).Value = x.Sheets(buCell.Value).Cells(71, rng1.Column)
+        y.Sheets("Data").Range("J" & lastRow).Value = x.Sheets(buCell.Value).Cells(73, rng1.Column)
+    Next buCell
+counter = counter + 3
+Next colCell
+
+Loop
+
+x.Close SaveChanges:=False
 
 End Sub
